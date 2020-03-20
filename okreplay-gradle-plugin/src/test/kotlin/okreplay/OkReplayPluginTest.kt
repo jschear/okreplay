@@ -10,6 +10,7 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 
 class OkReplayPluginTest {
@@ -18,7 +19,11 @@ class OkReplayPluginTest {
 
   @Before fun setUp() {
     DeviceBridgeProvider.setInstance(deviceBridge)
-    `when`(deviceBridge.devices()).thenReturn(listOf(device))
+    `when`(deviceBridge.useDevices(any()))
+        .thenAnswer { invocation ->
+            @Suppress("UNCHECKED_CAST")
+            (invocation.arguments.single() as (Device) -> Unit).invoke(device)
+        }
   }
 
   @Test fun appliesPlugin() {
@@ -112,6 +117,11 @@ class OkReplayPluginTest {
       project.evaluate()
     }
   }
+
+  /**
+   * Avoids [RuntimeException]s when stubbing Kotlin functions.
+   */
+  private fun <T> any(): T = Mockito.any()
 
   companion object {
     private const val FLAVOR_DIMENSION = "test"

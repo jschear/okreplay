@@ -9,16 +9,17 @@ import java.io.File
 open class DeviceBridge(adbPath: File, adbTimeoutMs: Int, private val logger: Logger) {
   private val deviceProvider = ConnectedDeviceProvider(adbPath, adbTimeoutMs, LoggerWrapper(logger))
 
-  init {
+  internal fun useDevices(block: (Device) -> Unit) {
     try {
       deviceProvider.init()
+      deviceProvider.devices
+          .map { Device(DeviceInterface.newInstance(it), logger) }
+          .forEach(block)
     } catch (e: DeviceException) {
       logger.warn(e.message)
+    } finally {
+      deviceProvider.terminate()
     }
   }
-
-  internal fun devices(): List<Device> =
-      deviceProvider.devices.map {
-        Device(DeviceInterface.newInstance(it), logger)
-      }
 }
+

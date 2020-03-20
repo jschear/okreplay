@@ -14,7 +14,7 @@ abstract class ClearTapesTask : DefaultTask(), TapeTask {
   @TaskAction
   internal fun clearTapes() {
     val deviceBridge = DeviceBridgeProvider.get(adbPath.get(), adbTimeout.get(), logger)
-    deviceBridge.devices().forEach { device ->
+    deviceBridge.useDevices { device ->
       val externalStorage = device.externalStorageDir()
       try {
         device.deleteDirectory("$externalStorage/$REMOTE_TAPES_DIR/${packageName.get()}/")

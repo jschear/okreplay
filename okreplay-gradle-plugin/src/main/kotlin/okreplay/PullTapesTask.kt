@@ -26,7 +26,7 @@ abstract class PullTapesTask : DefaultTask(), TapeTask {
     FileUtils.forceMkdir(localDir)
 
     val deviceBridge = DeviceBridgeProvider.get(adbPath.get(), adbTimeout.get(), logger)
-    deviceBridge.devices().forEach { device ->
+    deviceBridge.useDevices { device ->
       val externalStorage = device.externalStorageDir()
       if (externalStorage.isNullOrBlank()) {
         throw TaskExecutionException(this,
